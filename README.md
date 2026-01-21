@@ -1,6 +1,6 @@
 # AWARe: Activation-Weighted Adaptive REtaining for Mitigating Catastrophic Forgetting in MLLMs
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/release/python-3100/)
 
 This repository contains the official implementation of the paper **"Activation-Weighted Adaptive REtaining (AWARe)"**.
@@ -10,6 +10,10 @@ This repository contains the official implementation of the paper **"Activation-
 > Multimodal Large Language Models (MLLMs) have demonstrated remarkable capabilities across diverse tasks, exhibiting strong generalization and reasoning abilities through pre-training on large-scale multimodal corpora. However, when fine-tuning these models on downstream tasks, they suffer from *catastrophic forgetting*—a phenomenon where learning new task-specific knowledge leads to severe degradation of previously acquired capabilities. This forgetting arises because parameter updates optimized for new tasks inadvertently overwrite representations essential for previously learned knowledge, fundamentally limiting the practical deployment of MLLMs.
 >
 > To address this challenge, we propose **Activation-Weighted Adaptive REtaining (AWARe)**, a method that mitigates catastrophic forgetting in MLLMs by dynamically selecting which parameters to update based on their activation patterns. AWARe uses activation-based importance scores to selectively freeze critical parameters while allowing less important ones to adapt during fine-tuning. Crucially, AWARe operates *without altering the model architecture*, ensuring seamless compatibility with existing inference engines. Experimental results demonstrate that AWARe effectively preserves upstream capabilities while achieving superior performance on downstream tasks compared to existing methods.
+
+<p align="center">
+  <img src="assets/Method.jpg" width="100%">
+</p>
 
 ## 🚀 Features
 
@@ -21,7 +25,7 @@ This repository contains the official implementation of the paper **"Activation-
 
 We use `uv` for dependency management. Please ensure your environment is set up as follows:
 
-1.  **Install dependencies**
+**Install dependencies**
     ```bash
     cd AWARe
     # Ensure uv is installed
@@ -72,12 +76,12 @@ Select which nodes/parameters to freeze based on the calculated scores.
 bash scripts/AWARe/select.sh
 ```
 
-### 3. Training / Restore
+### 3. Training & Restore
 Fine-tune the model on downstream tasks while keeping the selected critical parameters frozen.
 
 ```bash
 bash scripts/AWARe/train.sh
-# or
+# and
 bash scripts/AWARe/restore.sh
 ```
 
@@ -85,6 +89,12 @@ bash scripts/AWARe/restore.sh
 Evaluate the model on both upstream (to check forgetting) and downstream tasks.
 
 ```bash
+# Eval IconQA + upstream
+bash scripts/AWARe/eval_all_iconqa.sh
+
+# Eval COCO + upstream
+bash scripts/AWARe/eval_all_coco.sh
+
 # Downstream evaluation (e.g., COCO)
 bash scripts/AWARe/downstream/eval_coco.sh
 
@@ -106,6 +116,12 @@ If you find this project useful in your research, please cite our paper:
 In processing
 ```
 
+## 🙏 Acknowledgements
+
+1. [LLaVA](https://github.com/haotian-liu/LLaVA)
+2. [LoKI](https://github.com/Nexround/LoKI)
+
+
 ## 📄 License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the [CC BY 4.0](LICENSE).
