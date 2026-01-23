@@ -96,11 +96,14 @@ class BaseAwareModel(ABC):
             )
         self.target_pos = config.target_pos
 
-        # Replace target layers up front so weight loading matches AwareLinear
-        self.apply_aware_linear()
-        # Freeze everything, then unfreeze the Aware active heads only
+        # Freeze all parameters first
         for param in self.parameters():
             param.requires_grad = False
+
+        # Replace target layers up front so weight loading matches AwareLinear
+        self.apply_aware_linear()
+
+        # Unfreeze the Aware active heads only
         for module in self.modules():
             if isinstance(module, AwareLinear):
                 module.active.weight.requires_grad = True
@@ -118,6 +121,11 @@ class BaseAwareModel(ABC):
                 continue
 
             _original_linear = self.get_submodule(module) 
+            if len(freeze_pos) >= _original_linear.out_features:
+                _original_linear.weight.requires_grad = True
+                if _original_linear.bias is not None:
+                    _original_linear.bias.requires_grad = True
+                continue
             parent, child = module.rsplit('.', 1)
             _module_parent = self.get_submodule(parent)
             if not isinstance(_original_linear, nn.Linear):
