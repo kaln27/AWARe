@@ -7,12 +7,10 @@ This repository contains the official implementation of the paper **"Activation-
 
 ## 📝 Abstract
 
-> Multimodal Large Language Models (MLLMs) have demonstrated remarkable capabilities across diverse tasks, exhibiting strong generalization and reasoning abilities through pre-training on large-scale multimodal corpora. However, when fine-tuning these models on downstream tasks, they suffer from *catastrophic forgetting*—a phenomenon where learning new task-specific knowledge leads to severe degradation of previously acquired capabilities. This forgetting arises because parameter updates optimized for new tasks inadvertently overwrite representations essential for previously learned knowledge, fundamentally limiting the practical deployment of MLLMs.
->
-> To address this challenge, we propose **Activation-Weighted Adaptive REtaining (AWARe)**, a method that mitigates catastrophic forgetting in MLLMs by dynamically selecting which parameters to update based on their activation patterns. AWARe uses activation-based importance scores to selectively freeze critical parameters while allowing less important ones to adapt during fine-tuning. Crucially, AWARe operates *without altering the model architecture*, ensuring seamless compatibility with existing inference engines. Experimental results demonstrate that AWARe effectively preserves upstream capabilities while achieving superior performance on downstream tasks compared to existing methods.
+> Multimodal Large Language Models (MLLMs) exhibit strong generalization and reasoning abilities due to large-scale multimodal pre-training. However, fine-tuning these models on downstream tasks often leads to catastrophic forgetting, where newly learned task-specific knowledge degrades previously acquired capabilities. This issue arises because gradient updates for new tasks overwrite parameters critical to prior knowledge, limiting the practical deployment of MLLMs. To address this challenge, we propose Activation-Weighted Adaptive REtaining (AWARe), a fine-tuning method that mitigates catastrophic forgetting by dynamically controlling parameter updates based on activation patterns. AWARe assigns activation-based importance scores to parameters, selectively freezing those essential for preserving prior capabilities while allowing less important parameters to adapt to new tasks. Importantly, AWARe operates without modifying model architectures, ensuring compatibility with existing inference engines. Extensive experiments demonstrate that AWARe effectively preserves upstream capabilities while achieving superior downstream performance compared to existing methods.
 
 <p align="center">
-  <img src="assets/Method.jpg" width="100%">
+  <img src="assets/Method.png" width="100%">
 </p>
 
 ## 🚀 Features
@@ -26,14 +24,15 @@ This repository contains the official implementation of the paper **"Activation-
 We use `uv` for dependency management. Please ensure your environment is set up as follows:
 
 **Install dependencies**
-    ```bash
-    cd AWARe
-    # Ensure uv is installed
-    pip install uv
 
-    # Sync the environment
-    uv sync
-    ```
+```bash
+cd AWARe
+# Ensure uv is installed
+pip install uv
+
+# Sync the environment
+uv sync
+```
 
 ## 📂 Data Preparation
 
