@@ -59,6 +59,9 @@ The AWARe pipeline consists of three main stages: Analysis, Selection, and Train
 ### All in one command
 ```bash
 bash run.sh
+
+# MMMU as clibration set
+bash run_mmmu.sh 
 ```
 
 ### 1. Analysis

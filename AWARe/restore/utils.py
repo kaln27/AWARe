@@ -105,6 +105,10 @@ def restore_aware_model(
             print(f"Warning: {module} not found, skipping...")
             continue
 
+        if len(freeze_pos) == original_proj.out_features:
+            print(f"Warning: All neurons frozen in {module}, skipping...")
+            continue
+
         # Initialize AWARe modified layer
         aware_layer = AwareLinear(original_proj, freeze_pos=freeze_pos)
 
