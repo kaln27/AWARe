@@ -31,7 +31,7 @@ cd AWARe
 pip install uv
 
 # Sync the environment
-uv sync
+uv sync --extra train
 ```
 
 ## 📂 Data Preparation
