@@ -36,6 +36,19 @@ uv sync --extra train
 
 ## 📂 Data Preparation
 
+### Download the dataset
+
+1. Download COCO, IconQA, OKVQA, OCRVQA, GQA, TextVQ according to this [issue](https://github.com/LiangJian24/LoRASculpt/issues/2).
+2. Continusou learning dataset, please refer to [huggingface](https://huggingface.co/datasets/MLLM-CL/MLLM-CL) or [modelscope](https://www.modelscope.cn/datasets/MLLM-CL/MLLM-CL). We put the sub-dataset we need below.
+
+- RS: https://www.modelscope.cn/datasets/MLLM-CL/MLLM-CL/resolve/master/RS.tar.gz
+- Med: https://www.modelscope.cn/datasets/MLLM-CL/MLLM-CL/resolve/master/Med.tar.gz
+- AD: https://www.modelscope.cn/datasets/MLLM-CL/MLLM-CL/resolve/master/AD.tar.gz
+- Sci: https://www.modelscope.cn/datasets/MLLM-CL/MLLM-CL/resolve/master/Sci.tar.gz
+- Fin: https://www.modelscope.cn/datasets/MLLM-CL/MLLM-CL/resolve/master/Fin.tar.gz
+
+### Configure the path
+
 Before running the analysis or training scripts, you need to configure the dataset paths.
 
 1.  **Analysis Data**:
@@ -102,6 +115,23 @@ bash scripts/AWARe/downstream/eval_coco.sh
 
 # Upstream evaluation (e.g., GQA)
 bash scripts/AWARe/upstream/eval_gqa.sh
+```
+
+### MLLM-DCL Benchmark
+
+### All in one command
+```bash
+# Run continuous learning (MLLM-DCL)
+bash run_cl.sh 
+
+# Eval continuous learning (MLLM-DCL)
+bash run_cl_eval.sh
+```
+### Evaluation one model
+```bash
+# Model path must corresponding to Current task
+# Current_Task is one of [RS Med AD Sci Fin]
+bash scripts/AWARe/eval_cl.sh <Model_Path> <Result_Dir> <Current_Task>
 ```
 
 ## 📊 Results

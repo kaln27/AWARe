@@ -5,7 +5,7 @@ import torch
 from llava.model import *
 from llava.constants import DEFAULT_IMAGE_PATCH_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN
 
-from activation_model import ActivationLlavaConfig
+from .activation_model import ActivationLlavaConfig
 
 def load_pretrained_model(model_path, cls, target=None, device_map="auto", device="cuda", use_flash_attn=False, **kwargs):
     kwargs = {"device_map": device_map, **kwargs}
@@ -24,10 +24,10 @@ def load_pretrained_model(model_path, cls, target=None, device_map="auto", devic
     cfg_pretrained = ActivationLlavaConfig.from_pretrained(model_path, target=target)
     model = cls.from_pretrained(model_path, low_cpu_mem_usage=True, config=cfg_pretrained, **kwargs)
 
-    assert os.path.exists(os.path.join(model_path, 'mm_projector.bin')), f"mm_projector.bin not found in {model_path}"
-    mm_projector_weights = torch.load(os.path.join(model_path, 'mm_projector.bin'), map_location='cpu')
-    mm_projector_weights = {k: v.to(torch.float16) for k, v in mm_projector_weights.items()}
-    model.load_state_dict(mm_projector_weights, strict=False)
+    if os.path.exists(os.path.join(model_path, 'mm_projector.bin')):
+        mm_projector_weights = torch.load(os.path.join(model_path, 'mm_projector.bin'), map_location='cpu')
+        mm_projector_weights = {k: v.to(torch.float16) for k, v in mm_projector_weights.items()}
+        model.load_state_dict(mm_projector_weights, strict=False)
 
     image_processor = None
 

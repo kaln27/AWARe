@@ -5,11 +5,11 @@ DATASET_NAME=${1:-'iconqa'}  # iconqa or coco
 DEVICE="localhost:${CUDA_VISIBLE_DEVICES:-0,1,2,3}"
 unset CUDA_VISIBLE_DEVICES
 DEEPSPEED_ZEROFILE=./scripts/zero2.json
-MODEL_NAME_OR_PATH=/mnt/models/liuhaotian/llava-v1.5-7b
 VISION_TOWER_PATH=/mnt/models/openai/clip-vit-large-patch14-336
 MODEL_SAVE_PATH=${2:-''}
 POS_PATH=${3:-''}
 NUM_TRAIN_EPOCHS=${4:-3}
+MODEL_NAME_OR_PATH=${5:-"/mnt/models/liuhaotian/llava-v1.5-7b"}
 
 echo "Training args:"
 echo "  DEVICE: $DEVICE"
@@ -32,6 +32,21 @@ if [ "$DATASET_NAME" == "iconqa" ]; then
 elif [ "$DATASET_NAME" == "coco" ]; then
     data_path="instructions/COCO-Caption/coco-train.json"
     image_folder="datasets/COCO/train2014"
+elif [ "$DATASET_NAME" == "RS" ]; then
+    data_path="datasets/RS/train.json"
+    image_folder="datasets/RS"
+elif [ "$DATASET_NAME" == "Med" ]; then
+    data_path="datasets/Med/train.json"
+    image_folder="datasets/Med"
+elif [ "$DATASET_NAME" == "AD" ]; then
+    data_path="datasets/AD/train.json"
+    image_folder="datasets/AD"
+elif [ "$DATASET_NAME" == "Sci" ]; then
+    data_path="datasets/Sci/train.json"
+    image_folder="datasets/Sci"
+elif [ "$DATASET_NAME" == "Fin" ]; then
+    data_path="datasets/Fin/train.json"
+    image_folder="datasets/Fin"
 else
     echo "Unsupported DATASET_NAME: $DATASET_NAME"
     exit 1

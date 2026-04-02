@@ -37,3 +37,6 @@ outputs/
 
 # Demo
 serve_images/
+
+.vscode/
+.codex
