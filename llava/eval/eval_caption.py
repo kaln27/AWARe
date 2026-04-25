@@ -28,6 +28,7 @@ class COCOEvaler(object):
         cocoEval.evaluate()
         os.remove(in_file.name)
         return cocoEval.eval
+
 def jsonl2json(pred):
     data=[]
     for pred_ in pred:
@@ -45,10 +46,10 @@ def get_args():
 def main() -> None:
     args = get_args()
     evaler = COCOEvaler(args.annotation_file)
-    preds= [json.loads(line) for line in open(args.result_file)]
-    preds=jsonl2json(preds)
+    preds = [json.loads(line) for line in open(args.result_file)]
+    preds = jsonl2json(preds)
     json.dump(preds,open(f'{args.output_dir}/preds.json','w'))
-    res=evaler.eval(json.load(open(f'{args.output_dir}/preds.json')))
+    res = evaler.eval(json.load(open(f'{args.output_dir}/preds.json')))
     print(res)
 
 

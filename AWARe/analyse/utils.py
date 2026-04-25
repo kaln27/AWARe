@@ -5,7 +5,7 @@ import torch
 from llava.model import *
 from llava.constants import DEFAULT_IMAGE_PATCH_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN
 
-from .activation_model import ActivationLlavaConfig
+from activation_model import ActivationLlavaConfig
 
 def load_pretrained_model(model_path, cls, target=None, device_map="auto", device="cuda", use_flash_attn=False, **kwargs):
     kwargs = {"device_map": device_map, **kwargs}

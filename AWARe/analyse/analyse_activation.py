@@ -41,6 +41,7 @@ class CustomDataset(Dataset):
         line = self.questions[index]
         image_file = line["image"]
         qs = line["text"]
+        ans = line.get("answer", None)
         if self.model_config.mm_use_im_start_end:
             qs = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN + '\n' + qs
         else:
@@ -48,7 +49,7 @@ class CustomDataset(Dataset):
 
         conv = conv_templates[self.conv_mode].copy()
         conv.append_message(conv.roles[0], qs)
-        conv.append_message(conv.roles[1], None)
+        conv.append_message(conv.roles[1], ans)
         prompt = conv.get_prompt()
 
         image = Image.open(image_file).convert('RGB')
@@ -345,15 +346,18 @@ def main():
         print("\n***** Collecting AWARe samples *****")
 
     all_samples = []
-    with open(args.question_file, 'r') as f:
-        for line in f:
-            all_samples.append(json.loads(line.strip()))
+    question_files = args.question_file.split(',')
+    for question_file in question_files:
+        with open(question_file, 'r') as f:
+            for line in f:
+                all_samples.append(json.loads(line.strip()))
 
     if is_main_process:
         print(f"Total samples to process: {len(all_samples)}")
 
     # Create dataset and dataloader
-    dataloader = create_data_loader(all_samples, tokenizer, image_processor, model.config)
+    model_config = accelerator.unwrap_model(model).config if args.parallel_mode == "data" else model.config
+    dataloader = create_data_loader(all_samples, tokenizer, image_processor, model_config)
 
     # Prepare dataloader with accelerator for data parallelism
     if args.parallel_mode == "data":
@@ -367,7 +371,7 @@ def main():
 
     for batch in tqdm(dataloader, desc="Processing batches", disable=not is_main_process):
         process_batch(
-            model.module if args.parallel_mode else model,
+            accelerator.unwrap_model(model) if args.parallel_mode == "data" else model,
             batch,
             device,
             activations,
@@ -380,21 +384,22 @@ def main():
 
     total_time = time.time() - start_time
 
+    underlying_model = accelerator.unwrap_model(model) if args.parallel_mode == "data" else model
     for module in activations:
-        concated = torch.concat(activations[module], dim=0)
-        activation = torch.mean(concated, dim=0)
-        weight = model.get_submodule(module).weight.data.detach()
-        weight = torch.norm(weight, p=2, dim=-1, dtype=torch.float32)
-        weight = weight / torch.norm(weight, p=2)
-        # analysis[module] = 0.3 * weight.cpu() + 0.7 * activation.cpu()
-        # analysis[module] = 0.7 * weight.cpu() + 0.3 * activation.cpu()
-        # analysis[module] = weight.cpu()
-        analysis[module] = activation.cpu()
+        concated = torch.cat(activations[module], dim=0)
+        if args.parallel_mode == "data":
+            concated = accelerator.gather(concated)
+        if is_main_process:
+            activation = torch.mean(concated, dim=0)
+            weight = underlying_model.get_submodule(module).weight.data.detach()
+            weight = torch.norm(weight, p=2, dim=-1, dtype=torch.float32)
+            weight = weight / torch.norm(weight, p=2)
+            # analysis[module] = 0.3 * weight.cpu() + 0.7 * activation.cpu()
+            # analysis[module] = 0.7 * weight.cpu() + 0.3 * activation.cpu()
+            # analysis[module] = weight.cpu()
+            analysis[module] = activation.cpu()
 
     # save to output file
-    if args.parallel_mode == "data":
-        # Gather activations from all processes
-        analysis = accelerator.gather(analysis)
     if is_main_process:
         torch.save(
             analysis,

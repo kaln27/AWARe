@@ -4,13 +4,18 @@ import random
 import ast
 from datasets import load_dataset
 from tqdm import tqdm
-from PIL import Image
+import argparse
+
+parser = argparse.ArgumentParser(description="Prepare MMMU dataset for analysis.")
+parser.add_argument("--output_dir", "-o",  type=str, default="outputs/mmmu_sample", help="Directory to save the prepared dataset.")
+parser.add_argument("--num_samples_per_subtask", "-n", type=int, default=20, help="Number of samples to extract from each sub-task.")
+args = parser.parse_args()
 
 # Configuration
 seed = 42
 random.seed(seed)
-ds_path = 'MMMU/MMMU'
-output_dir = 'outputs/mmmu_sample'
+ds_path = '/mnt/datasets/MMMU/MMMU'
+output_dir = args.output_dir
 output_jsonl = os.path.join(output_dir, 'mmmu_sample.jsonl')
 output_image_folder = os.path.join(output_dir, 'images')
 
@@ -100,7 +105,7 @@ for name in tqdm(sub_task):
         
         results.append(entry)
         count += 1
-        if count >= 20:
+        if count >= args.num_samples_per_subtask:
             break
 
 # Write outputs

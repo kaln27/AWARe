@@ -28,6 +28,7 @@ ckpts*
 datasets/
 tmp/
 outputs/
+results/
 
 .ipynb_checkpoints
 *.ipynb
