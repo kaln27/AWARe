@@ -47,6 +47,24 @@ elif [ "$DATASET_NAME" == "Sci" ]; then
 elif [ "$DATASET_NAME" == "Fin" ]; then
     data_path="datasets/Fin/train.json"
     image_folder="datasets/Fin"
+elif [ "$DATASET_NAME" == "ImageNet-R" ]; then
+    data_path="instructions/ImageNet-R/train.json"
+    image_folder="datasets"
+elif [ "$DATASET_NAME" == "ArxivQA" ]; then
+    data_path="instructions/ArxivQA/train_4w.json"
+    image_folder="datasets"
+elif [ "$DATASET_NAME" == "VizWiz" ]; then
+    data_path="instructions/VizWiz/train.json"
+    image_folder="datasets"
+elif [ "$DATASET_NAME" == "IconQA" ]; then
+    data_path="instructions/IconQA/train.json"
+    image_folder="datasets"
+elif [ "$DATASET_NAME" == "CLEVR-Math" ]; then
+    data_path="instructions/CLEVR-Math/train_4w.json"
+    image_folder="datasets"
+elif [ "$DATASET_NAME" == "Flickr30k" ]; then
+    data_path="instructions/Flickr30k/train_brief_4w.json"
+    image_folder="datasets"
 else
     echo "Unsupported DATASET_NAME: $DATASET_NAME"
     exit 1

@@ -8,13 +8,15 @@ STRATEGY=global_highest # [balanced, global_highest]
 NUM_TRAIN_EPOCHS=1
 MODEL_PATH=/mnt/models/liuhaotian/llava-v1.5-7b
 OUTPUT_ROOT=outputs/aware/LLaVA-7B-AWARe-ct
+CONFIG_NAME="mmmu_mllm_dcl_$(echo "$TARGET" | sed 's/\*\.//g; s/\([^,]\)[^,]*,*/\1/g')"
+OUTPUT_DIR="${OUTPUT_ROOT}/${CONFIG_NAME}"
 TASKS=(RS Med AD Sci Fin)
 ################################################################################################
 
 
 ################################################################################################
 ##################################### ANALYSIS STEP ############################################
-DS_OUTPUT_PATH=outputs/mmmu_sample/mmmu_sample.jsonl
+ANALYSIS_DATASETS="$OUTPUT_DIR/analysis_ds/mmmu_sample.jsonl"
 ANALYSIS_FILE=analysis.pt
 
 train_task() {
@@ -25,11 +27,9 @@ train_task() {
     local strategy="${5:-$STRATEGY}"
     local num_train_epochs="${6:-$NUM_TRAIN_EPOCHS}"
 
-    local config_name="mmmu_mllm_dcl_$(echo "$target" | sed 's/\*\.//g; s/\([^,]\)[^,]*,*/\1/g')"
-    local config_output_dir="${OUTPUT_ROOT}/${config_name}"
     local select_out_name="${strategy}_${quota}"
-    local task_work_dir="${config_output_dir}/${dataset_name}"
-    local run_name="mllm_dcl-${dataset_name}-${strategy}-${quota}-e${num_train_epochs}"
+    local task_work_dir="${OUTPUT_DIR}/${dataset_name}"
+    local run_name="mllm-dcl-${dataset_name}-${strategy}-${quota}-e${num_train_epochs}"
     local model_save_path="${task_work_dir}/llava-${run_name}"
     local pos_path="${task_work_dir}/${select_out_name}.json"
     local restored_model_path="${model_save_path}-restored"
@@ -40,12 +40,15 @@ train_task() {
     echo "[${dataset_name}] base model path: ${base_model_path}" >&2
     echo "[${dataset_name}] analysis dir: ${task_work_dir}" >&2
     echo "[${dataset_name}] run name: ${run_name}" >&2
-    python AWARe/analyse/analyse_activation.py \
+    echo "[${dataset_name}] analysis file: ${ANALYSIS_DATASETS}" >&2
+    
+    accelerate launch AWARe/analyse/analyse_activation.py \
         --model-path "$base_model_path" \
         --output-dir "$task_work_dir" \
         --batch-size 1 \
+        --parallel-mode data \
         --use-flash-attention \
-        --question-file "$DS_OUTPUT_PATH" \
+        --question-file "$ANALYSIS_DATASETS" \
         --target "$target" >&2
 
     if [ $? -ne 0 ]; then
@@ -53,7 +56,7 @@ train_task() {
         exit 1
     fi
 
-    bash scripts/AWARe/select.sh "$config_output_dir" "$dataset_name" \
+    bash scripts/AWARe/select.sh "$OUTPUT_DIR" "$dataset_name" \
         "$ANALYSIS_FILE" "$quota" "$strategy" "$select_out_name" >&2
 
     if [ $? -ne 0 ]; then
@@ -85,6 +88,17 @@ train_task() {
     printf '%s\n' "$restored_model_path"
 }
 
+# Prepare analysis dataset for MMMU
+mkdir -p "$OUTPUT_DIR/analysis_ds"
+python AWARe/analyse/prepare_mmmu.py \
+    --output_dir "$OUTPUT_DIR/analysis_ds" \
+    --num_samples_per_subtask 5
+
+# Prepare analysis dataset for MLLM-DCL
+python AWARe/analyse/prepare_analyse_ds_mllm_dcl.py \
+    --output_dir "$OUTPUT_DIR/analysis_ds" \
+    --each_ds_num 100
+
 CURRENT_MODEL_PATH="$MODEL_PATH"
 for task_name in "${TASKS[@]}"; do
     echo "============================================================" >&2
@@ -95,6 +109,7 @@ for task_name in "${TASKS[@]}"; do
         echo "Task $task_name failed. Exiting." >&2
         exit 1
     fi
+    ANALYSIS_DATASETS+=",${OUTPUT_DIR}/analysis_ds/${task_name}.jsonl"
 done
 
 echo "All tasks finished. Final restored model: $CURRENT_MODEL_PATH" >&2

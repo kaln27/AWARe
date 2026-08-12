@@ -25,7 +25,7 @@ echo "" >> "$SUMMARY_FILE"
 
 run_eval() {
     local task_name="$1"
-    local eval_script="scripts/AWARe/mllm-dcl/eval_${task_name,,}.sh"
+    local eval_script="scripts/AWARe/mllm_dcl/eval_${task_name,,}.sh"
 
     echo "============================================================"
     echo "Evaluating task: ${task_name}"
