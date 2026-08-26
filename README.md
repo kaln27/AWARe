@@ -1,4 +1,4 @@
-# AWARe: Mitigating Catastrophic Forgetting via Activation-Weighted Adaptive REtention
+# 🔥 [EMNLP 2026 Main] AWARe: Mitigating Catastrophic Forgetting via Activation-Weighted Adaptive REtention
 
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/release/python-3100/)
